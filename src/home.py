@@ -1,5 +1,7 @@
 import streamlit as st
 from src.search import show_result
+from src.modules.dictionary import graph
+
 
 st.header("TechScout")
 st.markdown(
@@ -9,6 +11,9 @@ st.markdown(
         TechScout ensures fast, accurate, and relevant results to empower your journey in technology exploration.
     """
 )
+
+st.graphviz_chart(graph)
+
 
 col_text, col_search = st.columns([0.90, 0.10], vertical_alignment="bottom")
 with col_text:
