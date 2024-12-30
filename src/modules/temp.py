@@ -2,7 +2,7 @@ import pandas as pd
 from tfidf import TFIDF
 import numpy as np
 
-df = pd.read_excel("data/IR_dataset.xlsx")
+df = pd.read_excel("IR-search-engine/data/IR_dataset.xlsx")
 
 INV_INDEX = {}
 for idx, row in df.iterrows():
@@ -19,4 +19,4 @@ tfidf = TFIDF()
 content_list = (df["content"].tolist())
 
 VECT_CONTENT = tfidf.fit_transform(content_list)
-print(VECT_CONTENT.shape)
+print(INV_INDEX)

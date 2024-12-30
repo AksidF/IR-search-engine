@@ -21,6 +21,7 @@ class Node:
 
 def convert_list_to_str(input_list: list[str]) -> str:
     """
+    asumption : array has been sorted
     Input: `['Abidin', 'Abilah', 'Abimana', 'Abing', 'Abiogenesis']`
     Output: `6Abidin6Abilah7Abimana5Abing11Abiogenesis`
     """
