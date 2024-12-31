@@ -23,31 +23,18 @@ def convert_list_to_str(input_list: list[str]) -> str:
     """
     asumption : array has been sorted
     Input: `['Abidin', 'Abilah', 'Abimana', 'Abing', 'Abiogenesis']`
-    Output: `6Abidin6Abilah7Abimana5Abing11Abiogenesis`
+    Output: `Abidin,Abilah,Abimana,Abing,Abiogenesis`
     """
-    result = ""
-    for term in input_list:
-        result += str(len(term)) + term
+    result = ",".join(input_list)
     return result
 
 
 def parse_string_to_list(input_string: str) -> list[str]:
     """
-    Input: `6Abidin6Abilah7Abimana5Abing11Abiogenesis`
+    Input:  `Abidin,Abilah,Abimana,Abing,Abiogenesis`
     Output: `['Abidin', 'Abilah', 'Abimana', 'Abing', 'Abiogenesis']`
     """
-    result = []
-    i = 0
-    while i < len(input_string):
-        # get the number of characters to extract
-        length_start = i
-        while i < len(input_string) and input_string[i].isdigit():
-            i += 1
-        length = int(input_string[length_start:i])
-
-        # extract string
-        result.append(input_string[i : i + length])
-        i += length
+    result = input_string.split(",")
     return result
 
 
@@ -59,7 +46,6 @@ def _generate_node(
     direction: Optional[str] = "left",
     skip: Optional[int] = 3,
 ):
-    print(input)
     if len(input) == 0:
         return
 
@@ -82,7 +68,7 @@ def _generate_node(
 
             root.right = node
             graph.edge(root.value, node.value, color="red")
-            
+
             # the rest is always on left
             _generate_node(node, graph, reversed_input[1:], index_list)
     else:
@@ -96,7 +82,7 @@ def _generate_node(
             root.right = new_root_node
         color = "green"
         if direction == "right":
-            color="red"
+            color = "red"
         graph.edge(root.value, new_root_node.value, color=color)
 
         prev = new_root_node
@@ -131,7 +117,7 @@ def generate_blocking_tree(
 
     mid = len(sorted_input) // 2
     value = sorted_input[mid]
-    root = Node(value=value)
+    root = Node(value=value, index=index_list.index(value))
     graph.node(value, label=value)
 
     _generate_node(root, graph, sorted_input[:mid], index_list, "left")  # left
@@ -142,15 +128,12 @@ def generate_blocking_tree(
 
 def _search_tree(term: str, tree: Optional[Node]):
     if tree is not None:
-        print(f"->{tree}", end="")
         if term == tree.value:
             return tree
         elif term < tree.value:
             left_node = tree.left
             while left_node is not None:
-                print(f"->{left_node}", end="")
                 if term == left_node.value:
-                    print()
                     return left_node
                 else:
                     left_node = left_node.left
@@ -165,8 +148,6 @@ def search_bloking_tree(
     if tree is None:
         return None
 
-    print(f"{tree}", end="")
-
     if term == tree.value:
         return tree
     elif term < tree.value:
@@ -174,12 +155,3 @@ def search_bloking_tree(
     elif term > tree.value:
         return _search_tree(term, tree.right)
     return None
-
-
-string = "8Abiosfer7Abiotik4Abis6Abisal7Abiseka9Abiturien5Abjad8Abjadiah6Ablasi6Ablaut8Ablepsia5Ablur8Abnormal12Abnormalitas5Abnus4Aboi7Abolisi4Abon8Abonemen11Abong-abong6Aborsi7Abortif8Abortiva7Abortus5Abrak11Abrakadabra5Abrar5Abras6Abrasi8Abreaksi5Abrek9Abreviasi7Abrikos11Abrit-abrit8Abrosfer7Abrupsi5Absah5Absen7Absensi7Absente11Absenteisme5Abses5Absis8Absolusi7Absolut"
-parse = parse_string_to_list(string)
-
-root, graph = generate_blocking_tree(parse, sorted(parse))
-result = search_bloking_tree("Abortif", root)
-
-print("\n\nresult", result)
