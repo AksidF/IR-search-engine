@@ -29,10 +29,3 @@ def save_vb_encoded_bits_to_file_multiline(list_of_doc_ids, filename):
             file.write(encoded_bits + '\n')
     print(f"VB encoded data saved to {filename}")
 
-# Example usage
-list_of_doc_ids = [
-    [10, 20, 50],
-    [5, 15, 40],
-    [824 , 829, 215406]
-]
-save_vb_encoded_bits_to_file_multiline(list_of_doc_ids, 'vb_encoded_multiline.txt')

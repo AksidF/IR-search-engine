@@ -40,10 +40,3 @@ def vb_decode_line_to_doc_ids(filename, line_index):
                 return vb_decode_to_doc_ids(numbers)
     raise IndexError(f"Line index {line_index} out of range in the file.")
 
-# Example usage
-filename = 'vb_encoded_multiline.txt'  # File containing VB-encoded data
-line_index = 2  # Decode the second line (0-based index)
-
-decoded_doc_ids = vb_decode_line_to_doc_ids(filename, line_index)
-print(f"Decoded Document IDs from line {line_index}: {decoded_doc_ids}")
-
