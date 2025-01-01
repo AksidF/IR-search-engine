@@ -1,5 +1,21 @@
-from modules.dictionary import parse_string_to_list
-from modules.vb_decode import vb_decode_line_to_doc_ids
+import sys
+import numpy as np
+import json
+
+from src.common.cache import cacher
+from src.common.logger import logger
+from src.modules.dictionary import (
+    parse_string_to_list,
+    generate_blocking_tree,
+    search_bloking_tree,
+)
+from src.modules.preprocessing.text import text_preprocessing
+from src.modules.preprocessing.tfidf import TFIDF
+from src.modules.search import search_documents, rank_documents
+from src.modules.vb_decode import vb_decode_line_to_doc_ids
+
+sys.setrecursionlimit(5_000)
+
 
 def load_dictionary(file_path):
     """
@@ -11,11 +27,12 @@ def load_dictionary(file_path):
     Returns:
         list[str]: List of terms.
     """
-    with open(file_path, 'r') as file:
+    with open(file_path, "r") as file:
         dictionary_string = file.read().strip()
     terms = parse_string_to_list(dictionary_string)
-    print(f"Loaded and parsed dictionary from {file_path}.")
+    logger.info(f"Loaded and parsed dictionary from {file_path}.")
     return terms
+
 
 def load_vb_encoded_indices(vb_encoded_file, line_indices):
     """
@@ -33,28 +50,51 @@ def load_vb_encoded_indices(vb_encoded_file, line_indices):
         try:
             doc_ids = vb_decode_line_to_doc_ids(vb_encoded_file, line_index)
             decoded_indices[line_index] = doc_ids
-            print(f"Decoded VB-encoded indices for line {line_index}.")
+            logger.info(f"Decoded VB-encoded indices for line {line_index}.")
         except IndexError as e:
-            print(f"Error: {e}")
+            logger.error(f"Error: {e}")
             decoded_indices[line_index] = None
     return decoded_indices
 
+
+def load_tfidf_config(file_path):
+    with open(file_path, "r") as file:
+        config = json.load(file)
+    return config
+
+
 # Example usage, delete later
-if __name__ == "__main__":
+def search(query):
+    preprocessed_query = text_preprocessing(query)
+
     dictionary_file = "compressed/dictionary_string.txt"
     vb_encoded_file = "compressed/vb_encoded.txt"
 
-    # Load dictionary
-    terms = load_dictionary(dictionary_file)
-    print("Terms:", terms)
-
-    # Load VB-encoded indices for multiple terms
-    term_to_lookups = ["Abidin", "Abilah", "Abing"]
-    line_indices = [terms.index(term) for term in term_to_lookups if term in terms]
-    decoded_doc_ids = load_vb_encoded_indices(vb_encoded_file, line_indices)
-
-    # Map terms to their decoded document IDs
-    term_doc_ids_mapping = {
-        terms[line_index]: doc_ids for line_index, doc_ids in decoded_doc_ids.items()
+    tfidf_config = load_tfidf_config("compressed/tfidf_config.json")
+    tfidf_config["index_to_word"] = {
+        int(k): v for k, v in tfidf_config["index_to_word"].items()
     }
-    print("Term to Document IDs Mapping:", term_doc_ids_mapping)
+    tfidf = TFIDF(**tfidf_config)
+    cacher.set("__tfidf__", tfidf)
+
+    docs_vector = np.load("compressed/vect_data.npy")
+    cacher.set("__docs_vector__", docs_vector)
+
+    terms = load_dictionary(dictionary_file)
+
+    root, graph = generate_blocking_tree(terms, terms)
+
+    inv_index_query = {}
+    for q in preprocessed_query:
+        result = search_bloking_tree(q, root)
+        if result is not None:
+            inv_index_query.update({result.index: q})
+
+    decoded_doc_ids = load_vb_encoded_indices(vb_encoded_file, inv_index_query.keys())
+
+    result_inv_index = {inv_index_query.get(k): v for k, v in decoded_doc_ids.items()}
+
+    search_results = list(search_documents(preprocessed_query, result_inv_index))
+    ranked_results = rank_documents(query, search_results)
+
+    return ranked_results

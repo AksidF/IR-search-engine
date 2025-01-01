@@ -1,5 +1,6 @@
 from modules.dictionary import convert_list_to_str
 from modules.vb_encoding import save_vb_encoded_bits_to_file_multiline
+from modules.preprocessing.inverted_index import build_inverted_index
 
 def compress_inverted_index(inverted_index):
     """
@@ -28,12 +29,5 @@ def compress_inverted_index(inverted_index):
 
 # Example usage, delete later
 if __name__ == "__main__":
-    inverted_index = {
-        "Abidin": [1, 4, 9],
-        "Abilah": [2, 5, 8],
-        "Abimana": [3, 6, 7],
-        "Abing": [10, 12],
-        "Abiogenesis": [11, 13, 14, 15]
-    }
-
+    inverted_index = build_inverted_index()
     compress_inverted_index(inverted_index)
