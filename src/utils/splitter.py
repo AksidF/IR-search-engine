@@ -1,7 +1,7 @@
 import numpy as np
 import sys
 import os
-
+import streamlit as st
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from common.logger import logger
@@ -21,7 +21,7 @@ def split_large_np(filename: str, output_dir: str):
 
 # split_large_np("compressed/vect_data.npy", "compressed/chunks")
 
-
+@st.cache_data
 def load_chunk_np(folder_name: str) -> np.ndarray:
     chunks = []
     i = 0
