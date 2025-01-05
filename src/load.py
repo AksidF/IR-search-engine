@@ -13,6 +13,7 @@ from src.modules.preprocessing.text import text_preprocessing
 from src.modules.preprocessing.tfidf import TFIDF
 from src.modules.search import search_documents, rank_documents
 from src.modules.vb_decode import vb_decode_line_to_doc_ids
+from src.utils.splitter import load_chunk_np
 
 sys.setrecursionlimit(5_000)
 
@@ -63,8 +64,7 @@ def load_tfidf_config(file_path):
     return config
 
 
-# Example usage, delete later
-def search(query):
+def search(query: str) -> list[int]:
     preprocessed_query = text_preprocessing(query)
 
     dictionary_file = "compressed/dictionary_string.txt"
@@ -77,7 +77,9 @@ def search(query):
     tfidf = TFIDF(**tfidf_config)
     cacher.set("__tfidf__", tfidf)
 
-    docs_vector = np.load("compressed/vect_data.npy")
+    docs_vector = load_chunk_np("compressed/chunks")
+    # docs_vector = np.load("compressed/vect_data.npy")
+
     cacher.set("__docs_vector__", docs_vector)
 
     terms = load_dictionary(dictionary_file)
